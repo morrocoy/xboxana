@@ -1,0 +1,101 @@
+####### Input directories
+
+SRCDIR   = ./src/
+INCDIR	 = ./include/
+
+####### Output directory
+
+OBJDIR   = tmp/
+
+####### Compiler, tools and options
+ROOTCFLAGS   := $(shell root-config --cflags)
+ROOTLIBS     := $(shell root-config --libs) -lMathMore
+ROOTGLIBS    := $(shell root-config --glibs)
+
+
+HDF5CFLAGS    = -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_BSD_SOURCE -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic
+HDF5LIBS      = -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -Wl,-z,relro -lsz -lz -ldl -lm -Wl,-rpath -Wl,/usr/lib64
+
+EIGENDIR      = ./eigen/
+
+BOOSTDIR    = #/opt/boost/
+BOOSTLIBS = -lboost_system -lboost_filesystem
+#-lboost_system -lboost_filesystem -lboost_atomic -lboost_chrono -lboost_date_time -lboost_thread -lboost_regex -lboost_log -lpthread
+
+
+CXX           = g++
+CXXFLAGS      = -pipe -g -O2 -Wall -std=c++11
+LINK          = g++
+DEL_FILE      = rm -f
+CHK_DIR_EXISTS= test -d
+MKDIR         = mkdir -p
+LDFLAGS       = -L. -L$(ROOTSYS)/lib -L$(BOOSTDIR)/lib -L$(LIBDIR) 
+INCPATH       = -I. -I$(ROOTSYS)/include -I$(BOOSTDIR)/include -I$(EIGENDIR) -I$(INCDIR)
+LIBS          = $(ROOTLIBS) $(HDF5LIBS) $(BOOSTLIBS) $(SYSLIBS)
+GLIBS         = $(ROOTGLIBS) $(HDF5LIBS) $(SYSLIBS)
+
+
+OBJECTS       = $(OBJDIR)main.o\
+		$(OBJDIR)TdmsDataType.o\
+		$(OBJDIR)TdmsChannel.o\
+		$(OBJDIR)TdmsGroup.o\
+		$(OBJDIR)TdmsObject.o\
+		$(OBJDIR)TdmsReader.o\
+		$(OBJDIR)XboxDataType.o\
+		$(OBJDIR)XboxDataTypeDict.o\
+		$(OBJDIR)XboxDAQChannel.o\
+		$(OBJDIR)XboxDAQChannelDict.o\
+		$(OBJDIR)XboxTdmsReader.o\
+		$(OBJDIR)XboxH5File.o\
+		$(OBJDIR)XboxTdmsConverter.o\
+		$(OBJDIR)XboxAnalyser.o\
+		$(OBJDIR)XboxAnalyserDict.o
+#		$(OBJDIR)XboxAnalyserDataSet.o\
+		$(OBJDIR)XboxAnalyserDataSetDict.o\
+
+
+TARGET        = xboxdaq
+
+####### Build rules
+
+first: dist all
+
+all: Makefile $(TARGET)
+
+$(TARGET):  $(OBJECTS)  
+	$(LINK) $(LFLAGS) $(LDFLAGS) $(LIBS) -lboost_system -lboost_filesystem -o $(TARGET) $(OBJECTS)
+
+
+dist:
+	@$(CHK_DIR_EXISTS) $(OBJDIR) || $(MKDIR) $(OBJDIR)
+
+clean:
+	-$(DEL_FILE) $(OBJECTS)
+	-$(DEL_FILE) *~ core *.core
+	-$(DEL_FILE) $(TARGET)
+
+####### Compile
+
+XboxDataTypeDict.cxx: $(INCDIR)XboxDataType.hxx $(INCDIR)XboxDataType.hxx $(INCDIR)XboxDataTypeLinkDef.h
+	@echo "Generating dictionary $@..."
+	@rootcling -f $@ -c $(INCPATH) $^  # add additional include directories if necessary
+	
+XboxDAQChannelDict.cxx: $(INCDIR)XboxDAQChannel.hxx $(INCDIR)XboxDAQChannel.hxx $(INCDIR)XboxDAQChannelLinkDef.h
+	@echo "Generating dictionary $@..."
+	@rootcling -f $@ -c $(INCPATH) $^  # add additional include directories if necessary
+	#mv $@ $(SRCDIR)$@
+	
+XboxAnalyserDict.cxx: $(INCDIR)XboxAnalyser.hxx $(INCDIR)XboxAnalyser.hxx $(INCDIR)XboxAnalyserLinkDef.h
+	@echo "Generating dictionary $@..."
+	@rootcling -f $@ -c $(INCPATH) $^  # add additional include directories if necessary
+	#mv $@ $(SRCDIR)$@
+	
+$(OBJDIR)main.o: main.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $^
+#$(CXX) -DBOOST_LOG_DYN_LINK -c $(CXXFLAGS) $(INCPATH) -o $@ $^
+
+$(OBJDIR)%.o: $(SRCDIR)%.cxx 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $^
+
+$(OBJDIR)%.o: %.cxx 
+	$(CXX) -c $(CXXFLAGS) $(HDF5CFLAGS) $(INCPATH) -o $@ $^

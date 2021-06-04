@@ -1,0 +1,33 @@
+<mvc:View
+	xmlns="sap.m"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core">
+	<Panel
+		headerText="Fit Function"
+		class="sapUiResponsiveMargin"
+		width="auto">
+		<content>
+			<Label 
+			   text="Type:" 
+			   labelFor="TypeFunc"/>
+			<ComboBox 
+				id="TypeFunc" 
+				selectedKey="{/fSelectTypeId}" 
+				items="{ path: '/fTypeFunc', sorter: { path: 'fFunc' } }" 
+				change="selectTypeFunc">
+				<core:Item 
+					key="{fId}" 
+					text="{fSet}" />
+			</ComboBox>    
+			<ComboBox 
+				id="TypeXY" 
+				selectedKey="{/fSelectXYId}" 
+				items="{ path: '/fTypeXY', sorter: { path: 'fXY' } }" 
+				change="onTypeXYChange">
+			   	<core:Item 
+			   		key="{fId}" 
+					text="{fSet}" />
+			</ComboBox>      
+		</content>
+	</Panel>
+</mvc:View>

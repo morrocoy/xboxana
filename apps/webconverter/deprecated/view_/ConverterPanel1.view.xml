@@ -1,0 +1,105 @@
+<mvc:View
+ 	class="sapUiSizeCompact"
+	height="100%"
+	width="450px"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:form="sap.ui.layout.form"
+	controllerName="localapp.controller.ConverterPanel">
+	<Page id="ConverterPanel_page" title="Converter Panel" showHeader="true">
+	<VBox class="sapUiSizeCompact">
+		<!-- What kind of form? -->
+			<form:Form id="MainForm"
+				editable="true"
+				ariaLabelledBy="Title1">
+				<form:layout>
+					<form:ResponsiveGridLayout
+						labelSpanXL="4"
+						labelSpanL="3"
+						labelSpanM="4"
+						labelSpanS="4"
+						adjustLabelSpan="false"
+						emptySpanXL="2"
+						emptySpanL="0"
+						emptySpanM="0"
+						emptySpanS="0"
+						columnsXL="2"
+						columnsL="1"
+						columnsM="1"
+						columnsS="3"
+						singleContainerFullSize="false" />
+				</form:layout>
+				<form:formContainers id="CompleteForm">
+					<!-- ComboBox for Data Set -->
+					<form:FormContainer ariaLabelledBy="dataset" id="TestForm">						
+						<form:FormElement>
+							<Label text="Data Set:" labelFor="DataSet">
+								<layoutData>
+									<l:GridData span="XL1 L4 M3 S3" />
+								</layoutData>
+							</Label>
+							<form:fields >
+								<ComboBox id="DataSet" selectedKey="{/fSelectDataId}" items="{ path: '/fDataSet', sorter: { path: 'fSet' } }">
+		               				<core:Item key="{fId}" text="{fSet}" />
+		               				<layoutData>
+										<l:GridData span="XL1 L4 M3 S7" />
+									</layoutData>
+		        				</ComboBox>	
+							</form:fields>
+							<!-- Fit Function Title -->
+								<mvc:XMLView viewName="localapp.view.FitFunctionPanel"/>
+						</form:FormElement>
+					</form:FormContainer>
+					<!-- Title for Operation -->
+					<form:FormContainer ariaLabelledBy="Operation">
+						<form:toolbar>
+							<Toolbar>
+								<Title id="operation" text="Operation" level="H4" titleStyle="H4"/>
+								<ToolbarSpacer />
+							</Toolbar>
+						</form:toolbar>
+						<!-- RadioButtons for Operation -->
+						<form:FormElement>
+							<form:fields>
+								<RadioButtonGroup id = "RBOperation" columns="4" width="100%" selectedIndex="{/fOperation}" enabled="{= ${/fSelectTypeId} === '0' &amp;&amp; ${/fSelectDataId} !== '1'}">
+									<buttons>
+										<RadioButton id="RB1-1" text="Nop"/>
+										<RadioButton id="RB1-2" text="Add"/>
+										<RadioButton id="RB1-3" text="NormAdd"/>
+										<RadioButton id="RB1-4" text="Conv"/>
+									</buttons>
+									<layoutData>
+										<l:GridData span="XL2 L1 M2 S12" />
+									</layoutData> 
+								</RadioButtonGroup>
+								<!-- Text Area for selected Type of Function -->
+								<TextArea id="OperationText" height="30px" value=" " valueLiveUpdate="{/fOpTextUpdate}">
+									<layoutData>
+										<l:GridData span="XL2 L1 M2 S12" />
+									</layoutData>
+								</TextArea>
+								<!-- Label and Text for Selected Function --> 
+								<Label text="Selected " labelFor="OperationText">
+									<layoutData>
+										<l:GridData span="XL2 L1 M2 S12" />
+									</layoutData> 
+								</Label>
+								<Text id="selectedOpText" text=" "/>
+								<Button id="parametersButton" text="Set Parameters..." enabled="{= ${/fSelectDataId} !== '1'}" press="setParametersDialog"/>	
+							</form:fields>
+						</form:FormElement>
+					</form:FormContainer>	
+				</form:formContainers>
+			</form:Form>
+		</VBox>
+		<!-- Buttons in Footer -->
+	    <Toolbar>
+	    	<Button text="Update" />
+	    	<Button text="Fit" press="doFit"/>
+	    	<Button text="Reset" press="resetPanel"/>
+	    	<Button text="Close" press="closePanel"/>
+	    </Toolbar>
+	</Page>
+</mvc:View>

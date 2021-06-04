@@ -1,0 +1,351 @@
+/*
+ * spline.h
+ *
+ * simple cubic spline interpolation library without external
+ * dependencies
+ *
+ * ---------------------------------------------------------------------
+ * Copyright (C) 2011, 2014 Tino Kluge (ttk448 at gmail.com)
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * ---------------------------------------------------------------------
+ *
+ */
+
+
+#ifndef XBOXSPLINE2_H
+#define XBOXSPLINE2_H
+
+#include <iostream>
+
+#include <cstdio>
+#include <cassert>
+#include <vector>
+#include <algorithm>
+
+// root functionality
+#include "Rtypes.h"
+
+#include "TMatrixD.h"
+#include "TVectorD.h"
+#include "TDecompQRH.h"
+#include "TDecompLU.h"
+#include "TMatrixDSparse.h"
+
+
+#include "Eigen/Core"
+#include "Eigen/Dense"
+
+// unnamed namespace only because the implementation is in this
+// header file and we don't want to export symbols to the obj files
+
+#ifndef XBOX_NO_NAMESPACE
+namespace XBOX {
+#endif
+
+
+
+// spline interpolation
+class spline2
+{
+public:
+    enum bd_type {
+        first_deriv = 1,
+        second_deriv = 2
+    };
+
+private:
+    std::vector<double> m_x,m_y;            // x,y coordinates of points
+    // interpolation parameters
+    // f(x) = a*(x-x_i)^3 + b*(x-x_i)^2 + c*(x-x_i) + y_i
+    std::vector<double> m_a,m_c;        // spline coefficients
+//    TVectorD  m_b;
+    Eigen::VectorXd m_b;
+	double m_b0, m_c0;                     // for left extrapol
+    bd_type m_left, m_right;
+    double  m_left_value, m_right_value;
+    bool    m_force_linear_extrapolation;
+
+public:
+    // set default boundary condition to be zero curvature at both ends
+    spline2(): m_left(second_deriv), m_right(second_deriv),
+        m_left_value(0.0), m_right_value(0.0),
+        m_force_linear_extrapolation(false)
+    {
+        ;
+    }
+
+    void test();
+
+    // optional, but if called it has to come be before set_points()
+    void set_boundary(bd_type left, double left_value,
+                      bd_type right, double right_value,
+                      bool force_linear_extrapolation=false);
+    void set_points(const std::vector<double>& x,
+                    const std::vector<double>& y);
+    double operator() (double x) const;
+    double deriv(int order, double x) const;
+};
+
+
+
+
+// spline implementation
+// -----------------------
+
+void spline2::set_boundary(spline2::bd_type left, double left_value,
+                          spline2::bd_type right, double right_value,
+                          bool force_linear_extrapolation)
+{
+    assert(m_x.size()==0);          // set_points() must not have happened yet
+    m_left=left;
+    m_right=right;
+    m_left_value=left_value;
+    m_right_value=right_value;
+    m_force_linear_extrapolation=force_linear_extrapolation;
+}
+
+
+void spline2::test() {
+
+	Int_t n=5;
+
+    Eigen::internal::BandMatrix<Double_t> A(n,n,1,1); // system matrix init with zeros
+    Eigen::VectorXd x;	// vector of unknowns
+    Eigen::VectorXd b(n); // right hand side vector
+
+    A.diagonal(0).setConstant(2.);
+    A.diagonal(-1).setConstant(1.);
+    A.diagonal(1).setConstant(1.);
+//    A.diagonal(1)(2)= 5.;
+
+    b.setConstant(5.);
+
+    x = A.toDenseMatrix().colPivHouseholderQr().solve(b);
+
+    std::cout << A.toDenseMatrix() << std::endl;
+    std::cout << b << std::endl;
+    std::cout << x << std::endl;
+
+}
+void spline2::set_points(const std::vector<double>& x,
+                        const std::vector<double>& y)
+{
+    assert(x.size()==y.size());
+    assert(x.size()>2);
+    m_x=x;
+    m_y=y;
+    int   n=x.size();
+    // TODO: maybe sort x and y, rather than returning an error
+    for(int i=0; i<n-1; i++) {
+        assert(m_x[i]<m_x[i+1]);
+    }
+
+	// setting up the matrix and right hand side of the equation system
+	// for the parameters b[]
+
+//    typedef Eigen::internal::BandMatrix<double, Eigen::Dynamic, 1, 1> BMatD;
+//    typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatD;
+
+
+//    Eigen::internal::BandMatrix<Double_t> a1(n,n,1,1);
+//
+//    a1.diagonal(0).setConstant(1);
+
+//    BMatD a1(5);
+//    a1(0,0) = 3.;
+
+//    std::cout << a1.toDenseMatrix();
+
+//    Eigen::internal::BandMatrixX<Double_t,n,1,1> A1;
+//    Eigen::Vector<Double_t, n>
+
+//    Eigen::DiagonalMatrix<double,5> a2;
+//    Eigen::Matrix<float, 3, 1> a1;
+
+    //	TMatrixDSparse A(n, n); // system matrix init with zeros
+    //	TVectorD rhs(n);
+
+
+    Eigen::internal::BandMatrix<Double_t> A(n,n,1,1); // system matrix init with zeros
+//	Eigen::VectorXd x;	// vector of unknowns
+	Eigen::VectorXd rhs(n); // right hand side vector
+
+
+	for(int i=1; i<n-1; i++) {
+		A.diagonal(1)(i-1)=1.0/3.0*(x[i]-x[i-1]);
+		A.diagonal(0)(i)=2.0/3.0*(x[i+1]-x[i-1]);
+		A.diagonal(-1)(i)=1.0/3.0*(x[i+1]-x[i]);
+		rhs(i)=(y[i+1]-y[i])/(x[i+1]-x[i]) - (y[i]-y[i-1])/(x[i]-x[i-1]);
+	}
+	// boundary conditions
+	if(m_left == spline::second_deriv) {
+		// 2*b[0] = f''
+		A.diagonal(0)(0)=2.0;
+		A.diagonal(-1)(0)=0.0;
+		rhs(0)=m_left_value;
+	} else if(m_left == spline::first_deriv) {
+		// c[0] = f', needs to be re-expressed in terms of b:
+		// (2b[0]+b[1])(x[1]-x[0]) = 3 ((y[1]-y[0])/(x[1]-x[0]) - f')
+		A.diagonal(0)(0)=2.0*(x[1]-x[0]);
+		A.diagonal(-1)(0)=1.0*(x[1]-x[0]);
+		rhs(0)=3.0*((y[1]-y[0])/(x[1]-x[0])-m_left_value);
+	} else {
+		assert(false);
+	}
+	if(m_right == spline::second_deriv) {
+		// 2*b[n-1] = f''
+		A.diagonal(0)(n-1)=2.0;
+		A.diagonal(1)(n-2)=0.0;
+		rhs[n-1]=m_right_value;
+	} else if(m_right == spline::first_deriv) {
+		// c[n-1] = f', needs to be re-expressed in terms of b:
+		// (b[n-2]+2b[n-1])(x[n-1]-x[n-2])
+		// = 3 (f' - (y[n-1]-y[n-2])/(x[n-1]-x[n-2]))
+		A.diagonal(0)(n-1)=2.0*(x[n-1]-x[n-2]);
+		A.diagonal(1)(n-2)=1.0*(x[n-1]-x[n-2]);
+		rhs[n-1]=3.0*(m_right_value-(y[n-1]-y[n-2])/(x[n-1]-x[n-2]));
+	} else {
+		assert(false);
+	}
+
+	// solve the equation system to obtain the parameters b[]
+//        m_b=A.lu_solve(rhs);
+//	TDecompQRH qr(A);
+//	Bool_t state;
+//	m_b.ResizeTo(n);
+//	m_b = qr.Solve(rhs, state);
+//	if(!state)
+//		printf("Error: Could not solve Ax = b\n");
+
+//	A.Print();
+//	rhs.Print();
+//	m_b.Print();
+
+	m_b = A.toDenseMatrix().colPivHouseholderQr().solve(rhs);
+
+	// calculate parameters a[] and c[] based on b[]
+	m_a.resize(n);
+	m_c.resize(n);
+	for(int i=0; i<n-1; i++) {
+		m_a[i]=1.0/3.0*(m_b(i+1)-m_b(i))/(x[i+1]-x[i]);
+		m_c[i]=(y[i+1]-y[i])/(x[i+1]-x[i])
+			   - 1.0/3.0*(2.0*m_b(i)+m_b(i+1))*(x[i+1]-x[i]);
+	}
+
+    // for left extrapolation coefficients
+    m_b0 = (m_force_linear_extrapolation==false) ? m_b(0) : 0.0;
+    m_c0 = m_c[0];
+
+    // for the right extrapolation coefficients
+    // f_{n-1}(x) = b*(x-x_{n-1})^2 + c*(x-x_{n-1}) + y_{n-1}
+    double h=x[n-1]-x[n-2];
+    // m_b[n-1] is determined by the boundary condition
+    m_a[n-1]=0.0;
+    m_c[n-1]=3.0*m_a[n-2]*h*h+2.0*m_b(n-2)*h+m_c[n-2];   // = f'_{n-2}(x_{n-1})
+    if(m_force_linear_extrapolation==true)
+        m_b(n-1)=0.0;
+}
+
+
+double spline2::operator() (double x) const
+{
+    size_t n=m_x.size();
+    // find the closest point m_x[idx] < x, idx=0 even if x<m_x[0]
+    std::vector<double>::const_iterator it;
+    it=std::lower_bound(m_x.begin(),m_x.end(),x);
+    int idx=std::max( int(it-m_x.begin())-1, 0);
+
+    double h=x-m_x[idx];
+    double interpol;
+    if(x<m_x[0]) {
+        // extrapolation to the left
+        interpol=(m_b0*h + m_c0)*h + m_y[0];
+    } else if(x>m_x[n-1]) {
+        // extrapolation to the right
+        interpol=(m_b(n-1)*h + m_c[n-1])*h + m_y[n-1];
+    } else {
+        // interpolation
+        interpol=((m_a[idx]*h + m_b(idx))*h + m_c[idx])*h + m_y[idx];
+    }
+    return interpol;
+}
+
+double spline2::deriv(int order, double x) const
+{
+    assert(order>0);
+
+    size_t n=m_x.size();
+    // find the closest point m_x[idx] < x, idx=0 even if x<m_x[0]
+    std::vector<double>::const_iterator it;
+    it=std::lower_bound(m_x.begin(),m_x.end(),x);
+    int idx=std::max( int(it-m_x.begin())-1, 0);
+
+    double h=x-m_x[idx];
+    double interpol;
+    if(x<m_x[0]) {
+        // extrapolation to the left
+        switch(order) {
+        case 1:
+            interpol=2.0*m_b0*h + m_c0;
+            break;
+        case 2:
+            interpol=2.0*m_b0*h;
+            break;
+        default:
+            interpol=0.0;
+            break;
+        }
+    } else if(x>m_x[n-1]) {
+        // extrapolation to the right
+        switch(order) {
+        case 1:
+            interpol=2.0*m_b(n-1)*h + m_c[n-1];
+            break;
+        case 2:
+            interpol=2.0*m_b(n-1);
+            break;
+        default:
+            interpol=0.0;
+            break;
+        }
+    } else {
+        // interpolation
+        switch(order) {
+        case 1:
+            interpol=(3.0*m_a[idx]*h + 2.0*m_b(idx))*h + m_c[idx];
+            break;
+        case 2:
+            interpol=6.0*m_a[idx]*h + 2.0*m_b(idx);
+            break;
+        case 3:
+            interpol=6.0*m_a[idx];
+            break;
+        default:
+            interpol=0.0;
+            break;
+        }
+    }
+    return interpol;
+}
+
+
+
+} // namespace XBOX
+
+
+
+#endif /* XBOXSPLINE */
+
+

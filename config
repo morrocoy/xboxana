@@ -1,0 +1,11 @@
+${ProjDirPath}/app/converter/include
+${ProjDirPath}/core/xboxbase/include
+${ProjDirPath}/core/xboxchannel/include
+${ProjDirPath}/io/converter/include
+${ProjDirPath}/io/hdf5/include
+${ProjDirPath}/io/tdms/include
+/Users/kpapke/programming/root/builds/root-v6.16.00
+/usr/include/qt5/QtWidgets
+/usr/include/qt5/Qt3DInput
+/usr/include/qt5/QtCore
+/home/kpapke/projects/CliC/xbox/framework/utilities/eigen3/

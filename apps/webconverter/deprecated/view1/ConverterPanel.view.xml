@@ -1,0 +1,32 @@
+<mvc:View 
+	class="sapUiSizeCompact" 
+	height="100%" 
+	controllerName="localapp.controller.ConverterPanel"
+	xmlns:mvc="sap.ui.core.mvc" 
+	xmlns:core="sap.ui.core"  
+	xmlns="sap.m">
+   <Page id="testpanel_page" title="Converter Panel" showHeader="true">
+       <content>
+         <VBox class="sapUiSmallMargin">
+            <Label text="Data" labelFor="FitData"/>
+            <ComboBox id="FitData" selectedKey="{/fSelectDataId}" items="{ path: '/fDataNames', sorter: { path: 'fName' } }">
+               <core:Item key="{fId}" text="{fName}" />
+            </ComboBox>
+            <Label text="Models" labelFor="FitModel"/>
+            <ComboBox id="FitModel" selectedKey="{/fSelectModelId}" items="{ path: '/fModelNames', sorter: { path: 'fName' } }">
+               <core:Item key="{fId}" text="{fName}" />
+            </ComboBox>
+            <Text id="SampleText" text="Example"/>
+         </VBox>
+      </content>
+      <footer>
+         <Bar>
+            <contentRight>
+               <Button id="panel_GetBinary" text="Get binary" press="handleGetBinary" />
+               <Button id="panel_Fit" text="Fit" press="handleFitPress" />
+               <Button id="panel_Close" text="Close" press="closePanel" />
+            </contentRight>
+         </Bar>
+      </footer>
+   </Page>
+</mvc:View>

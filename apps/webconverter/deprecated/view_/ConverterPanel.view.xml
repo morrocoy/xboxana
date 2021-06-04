@@ -1,0 +1,93 @@
+<mvc:View
+ 	class="sapUiSizeCompact"
+	height="100%"
+	width="450px"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:form="sap.ui.layout.form"
+	controllerName="localapp.controller.ConverterPanel">
+	<Page id="ConverterPanel_page" title="Converter Panel" showHeader="true">
+		<headerContent>
+			<Button
+					icon="sap-icon://hello-world"
+					press="onOpenDialog"/>
+		</headerContent>
+		<!--<content> -->
+			<!-- <mvc:XMLView viewName="localapp.view.Settings"/> -->
+			<!-- <mvc:XMLView viewName="localapp.view.Logging"/>  -->
+		<!--</content> -->
+		<Panel
+			headerText="Settings"
+			class="sapUiResponsiveMargin"
+			width="auto">
+			<content>
+				<FormattedText
+					htmlText="Device"
+					class ="sapUiSmallMargin sapThemeHighlight-asColor"/>
+				<ComboBox 
+					id="TypeFunc" 
+					selectedKey="{/fSelectStructureId}" 
+					items="{ path: '/fStructure', sorter: { path: 'fset' } }" 
+					change="onTypeXYChange"
+					width="90%"
+					class ="sapUiSmallMargin">
+					<core:Item 
+						key="{fId}" 
+						text="{fSet}"/>
+				</ComboBox>    
+				<FormattedText
+					htmlText="Time Period"
+					class ="sapUiSmallMargin sapThemeHighlight-asColor"/>
+				<DatePicker
+					id="idStartDate"
+					value="{/fStartDate}"
+					width="40%"
+					class ="sapUiSmallMargin"/>
+				<DatePicker
+					id="idEndDate"
+					value="{/fEndDate}"
+					width="40%"
+					class ="sapUiSmallMargin"/>
+				<FormattedText
+					htmlText="Output File"
+					class ="sapUiSmallMargin sapThemeHighlight-asColor"/>
+				<Input
+					value="{/fOutputFileName}" 
+					valueLiveUpdate="true"
+					width="90%"
+					class ="sapUiSmallMargin"/>
+				<RadioButtonGroup 
+					id = "RBFormat" 
+					columns="4" 
+					width="100%" 
+					selectedIndex="{/fSelectFileFormatId}">
+					<buttons>
+						<RadioButton id="RBFormat-1" text="ROOT"/>
+						<RadioButton id="RBFormat-2" text="HDF5"/>
+					</buttons>
+				</RadioButtonGroup>
+				<!-- Control Buttons -->
+				<Toolbar
+					class ="sapUiTinyMargin"
+					width="90%">
+				<Button 
+					text="Convert"
+					width="30%"
+					press="onConvert"/>
+				<ToolbarSpacer/>
+				<Button 
+					text="Cancel" 
+					press="onCancel"
+					width="30%"/>
+				<ToolbarSpacer/>
+				<Button 
+					text="Close" 
+					press="onClose"
+					width="30%"/>
+				</Toolbar> 
+			</content>
+		</Panel>
+	</Page>
+</mvc:View>

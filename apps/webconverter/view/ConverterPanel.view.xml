@@ -1,0 +1,76 @@
+<mvc:View
+ 	class="sapUiSizeCompact"
+	height="100%"
+	width="450px"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:form="sap.ui.layout.form"
+	controllerName="localapp.controller.ConverterPanel">
+	<Page id="testpanel_page" title="Converter Panel" showHeader="true">
+		<headerContent>
+			<Button
+			icon="sap-icon://hello-world"
+			press="onOpenDialog"/>
+		</headerContent>
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<Label text="Structure" labelFor="idStructure"/>
+				<ComboBox 
+					id="idStructure" 
+					selectedKey="{/fSelectStructureId}" 
+					items="{ path: '/fStructure', sorter: { path: 'fName' } }" 
+					change="onStructureChange"
+					width="90%"
+					class ="sapUiSmallMargin">
+					<core:Item 
+						key="{fId}" 
+						text="{fName}"/>
+				</ComboBox> 
+				<Label text="Time Period" labelFor="idDateBegin"/>
+				<HBox class="sapUiSmallMargin">
+					<DatePicker
+						id="idDateBegin"
+						value="{/fDateBegin}"
+						valueFormat="yyyy/MM/dd"
+						displayFormat="MMM d, y"
+						width="90%"/>
+					<DatePicker
+						id="idDateEnd"
+						value="{/fDateEnd}"
+						valueFormat="yyyy/MM/dd"
+						displayFormat="MMM d, y"
+						width="90%"/>
+				</HBox>
+				<Label text="Output File" labelFor="idOutputFileName"/>
+				<Input
+					id="idOutputFileName"
+					value="{/fOutputFileName}" 
+					valueLiveUpdate="true"
+					width="90%"
+					class ="sapUiSmallMargin"/>
+				<RadioButtonGroup 
+					id = "idFormat" 
+					columns="4" 
+					width="100%" 
+					selectedIndex="{/fFileFormatId}">
+					<buttons>
+						<RadioButton id="RBFormat-1" text="ROOT"/>
+						<RadioButton id="RBFormat-2" text="HDF5"/>
+					</buttons>
+				</RadioButtonGroup>
+				<Text id="SampleText" text="{/fLog}"/>
+			</VBox>
+		</content>
+		<footer>
+			<Bar>
+				<contentRight>
+					<Button id="btnConvert" text="Convert" press="onConvert" enabled="{/fConvertEnabled}" />
+					<Button id="btnidCancel" text="Cancel" press="onCancel" />
+					<Button id="btnidClose" text="Close" press="onClose" />
+				</contentRight>
+			</Bar>
+		</footer>
+	</Page>
+</mvc:View>
