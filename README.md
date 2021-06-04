@@ -1,6 +1,6 @@
 ## About
 
-TODO
+High-gradient data analysis tools for CERN Xbox test stands
 
 ## Build Status
 | Branch | Continuous | Nightly |
@@ -16,7 +16,7 @@ TODO
 ## Building
 Clone the repo
 
-    $ git clone https://github.com/...
+    $ git clone https://github.com/morrocoy/xboxana.git
     
 Make a directory for building
 

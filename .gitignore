@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[co]
+
+# C extensions
+#*.so
+#*.packages
+#*.dll
+#*.lib
+
+# distribution / packaging
+bin/
+data/
+pictures/
+*.egg-info/
+*.egg
+.installed.cfg
+
+# pycharm project
+.idea/
+
+# Sphinx documentation
+doc/build/
+
+
